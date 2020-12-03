@@ -412,15 +412,16 @@ div.tocify {
 
 <p><strong>IMPORTANT:</strong> You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.</p>
 <p>This is an <code>.Rmd</code> file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.</p>
-<p>Last compiled: 2020-12-01</p>
+<p>Last compiled: 2020-12-03</p>
 <p>Notice that whatever you define as a top level header, automatically gets put into the table of contents bar on the left.</p>
 <div id="first-assignement-bike-sales-at-different-cities-in-germany" class="section level1">
 <h1><span class="header-section-number">1</span> First Assignement: Bike Sales at different cities in germany</h1>
-<p>The asignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plottable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019</p>
+<p>The assignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plotable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019</p>
 <div class="figure">
 <img src="02_figures/Revenue_by_years_and_cities.png" alt="" />
 <p class="caption">Firure: Sales for different Cities</p>
 </div>
+<pre class="r"><code>source(&#39;01_getting_Started/getting_Started.R&#39;, echo = FALSE)</code></pre>
 <div id="second-level-header" class="section level2">
 <h2><span class="header-section-number">1.1</span> Second level header</h2>
 <p>You can add more headers by adding more hashtags. These won’t be put into the table of contents</p>
@@ -430,10 +431,82 @@ div.tocify {
 </div>
 </div>
 </div>
-<div id="my-second-post-note-the-order" class="section level1">
-<h1><span class="header-section-number">2</span> My second post (note the order)</h1>
-<p>Last compiled: 2020-12-01</p>
-<p>I’m writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom</p>
+<div id="data-wrangling" class="section level1">
+<h1><span class="header-section-number">2</span> Data Wrangling</h1>
+<p>Last compiled: 2020-12-03</p>
+<p>The third task is to learn Data Wrangling. The code for practice is the following</p>
+<pre class="r"><code>source(&#39;00_scripts/Data_wrangling.R&#39;, echo = TRUE)</code></pre>
+<pre><code>## 
+## &gt; library(&quot;tidyverse&quot;)
+## 
+## &gt; library(&quot;readxl&quot;)
+## 
+## &gt; library(&quot;lubridate&quot;)
+## 
+## &gt; library(&quot;writexl&quot;)
+## 
+## &gt; library(&quot;RSQLite&quot;)
+## 
+## &gt; library(&quot;DBI&quot;)
+## 
+## &gt; library(&quot;httr&quot;)
+## 
+## &gt; library(&quot;glue&quot;)
+## 
+## &gt; library(&quot;jsonlite&quot;)
+## 
+## &gt; library(&quot;rvest&quot;)
+## 
+## &gt; library(&quot;purrr&quot;)
+## 
+## &gt; library(&quot;xopen&quot;)
+## 
+## &gt; library(&quot;stringi&quot;)
+## 
+## &gt; bikedata &lt;- read_excel(&quot;00_Data/01_bike_sales/01_raw_data/bikes.xlsx&quot;)
+## 
+## &gt; biketbl_1 &lt;- bikedata %&gt;% select(bike.id, model, model.year)
+## 
+## &gt; biketbl_2 &lt;- bikedata %&gt;% select(1:3)
+## 
+## &gt; biketbl_3 &lt;- bikedata %&gt;% select(1, contains(&quot;model&quot;))
+## 
+## &gt; model_and_price &lt;- bikedata %&gt;% select(&quot;model&quot;, &quot;price&quot;)
+## 
+## &gt; bikedata %&gt;% select(contains(&quot;category&quot;), everything())
+## # A tibble: 231 x 9
+##    category  bike.id model model.year frame.material weight price gender url    
+##    &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;  
+##  1 Road - R~    2875 Aero~       2020 carbon           7.6   4579 unisex https:~
+##  2 Road - R~    2873 Aero~       2020 carbon           7.27  6919 unisex https:~
+##  3 Road - R~    2874 Aero~       2020 carbon           7.1   6429 unisex https:~
+##  4 Road - R~    2876 Aero~       2020 carbon           7.73  5069 unisex https:~
+##  5 Road - R~    2877 Aero~       2020 carbon           7.83  3609 unisex https:~
+##  6 Road - R~    2225 Aero~       2019 carbon           6.8   6139 unisex https:~
+##  7 Road - R~    2091 Aero~       2019 carbon           6.8   5359 unisex https:~
+##  8 Road - R~    2086 Aero~       2021 carbon           7.6   2629 unisex https:~
+##  9 Road - R~    2088 Aero~       2020 carbon           7.3   3699 unisex https:~
+## 10 Road - R~    2120 Aero~       2020 carbon           7.2   3219 female https:~
+## # ... with 221 more rows
+## 
+## &gt; mean_price &lt;- bikedata %&gt;% pull(price) %&gt;% mean()
+## 
+## &gt; char &lt;- bikedata %&gt;% select(where(is.character))
+## 
+## &gt; numerical &lt;- bikedata %&gt;% select(where(is.numeric))
+## 
+## &gt; nonnumerical &lt;- bikedata %&gt;% select(!where(is.numeric))
+## 
+## &gt; bikedata &lt;- bikedata %&gt;% separate(col = category, 
+## +     into = c(&quot;category_1&quot;, &quot;category_2&quot;, &quot;category_3&quot;), sep = &quot; - &quot;)
+## 
+## &gt; bikedata1_7 &lt;- bikedata %&gt;% select(model, contains(&quot;category&quot;), 
+## +     price) %&gt;% rename(Model = model, `Bike Familiy` = category_1, 
+## +     `Ride St .... [TRUNCATED] 
+## 
+## &gt; bikedata1_8 &lt;- bikedata %&gt;% select(model, contains(&quot;category&quot;), 
+## +     price) %&gt;% set_names(c(&quot;Model&quot;, &quot;Bike Family&quot;, &quot;Bike Ridestyle&quot;, 
+## +     &quot;Bike ...&quot; ... [TRUNCATED]</code></pre>
 </div>
 <div id="adding-r-stuff" class="section level1">
 <h1><span class="header-section-number">3</span> Adding R stuff</h1>
@@ -441,7 +514,7 @@ div.tocify {
 <p>So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
 <pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
 hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You’ll learn that all of these things and more can be customized in each R code block.</p>
 </div>
 

@@ -26,11 +26,27 @@ Notice that whatever you define as a top level header, automatically gets put in
 
 # First Assignement: Bike Sales at different cities in germany
 
-The asignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plottable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019
+The assignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plotable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019
 
  
 
 ![Firure: Sales for different Cities](02_figures/Revenue_by_years_and_cities.png)
+
+```{r,eval=FALSE}
+source('01_getting_Started/getting_Started.R', echo = FALSE)
+
+
+
+
+
+```
+
+
+
+
+
+
+
 
 ## Second level header
 
@@ -40,12 +56,138 @@ You can add more headers by adding more hashtags. These won't be put into the ta
 
 Here's an even lower level header
 
-# My second post (note the order)
+# Data Wrangling
 
 Last compiled: `r Sys.Date()`
 
-I'm writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom
+In the Third challenge, patents of various companies should be analized.
 
+## 3.1
+The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the "assignee" and "patent_assignee" datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated
+
+![Firure: Sales for different Cities](02_figures/Most_Patents_assigned_US.png)
+The 10 most effective companies in terms of patent assignement are listed on the ordinate. The code to this graph is the following.
+
+```{r,eval=FALSE}
+
+library(vroom)
+library(tidyverse)
+library(data.table)
+
+
+'col_types <- list(
+  id = col_integer(),
+  type = col_character(),
+  number = col_integer(),
+  country = col_character(),
+  date = col_date("%Y-%m-%d"),
+  abstract = col_character(),
+  title = col_character(),
+  kind = col_character(),
+  num_claims = col_double(),
+  filename = col_character(),
+  withdrawn = col_character()
+)
+
+patent_tbl <- vroom(
+  file       = "00_Data/03_patents/patent.tsv", 
+  delim      = "\t", 
+  col_types  = col_types,
+  na         = c("", "NA", "NULL")
+)
+
+#glimpse(patent_tbl)'
+
+col_types <- list(
+  patent_id = col_integer(),
+  assignee_id = col_character(),
+  location_id = col_character()
+  )
+
+patent_assignee_tbl <- vroom(
+  file       = "00_Data/03_patents/patent_assignee.tsv", 
+  delim      = "\t", 
+  col_types  = col_types,
+  na         = c("", "NA", "NULL")
+)
+
+col_types <- list(
+  id = col_character(),
+  type = col_integer(),
+  name_first = col_character(),
+  name_last = col_character(),
+  organization = col_character()
+)
+
+assignee_tbl <- vroom(
+  file       = "00_Data/03_patents/assignee.tsv", 
+  delim      = "\t", 
+  col_types  = col_types,
+  na         = c("", "NA", "NULL")
+)
+
+'col_types <- list(
+  uuid = col_character(),
+  patent_id = integer(),
+  mainclass_id = col_integer(),
+  subclass_id = col_character(),
+  sequence = col_integer()
+)
+
+uspc_tbl <- vroom(
+  file       = "00_Data/03_patents/uspc.tsv", 
+  delim      = "\t", 
+  col_types  = col_types,
+  na         = c("", "NA", "NULL")
+)'
+glimpse(patent_assignee_tbl)
+glimpse(assignee_tbl)
+#1. Which US Company has the most Patents
+#join data 
+wrangeled<-left_join(patent_assignee_tbl,assignee_tbl,by = c("assignee_id"="id"))
+#only patents od US Companies shall be counted e.g. the type has to be exactly 2
+
+
+wrangeled<-wrangeled%>%
+  filter(type == 2)%>%
+  select(organization, patent_id, everything())%>%
+  select(-name_first, -name_last, -location_id, -assignee_id)%>%
+  arrange(desc(organization))
+
+
+Patentnumber<-wrangeled%>%
+  filter(!is.na(patent_id))%>%
+  count(organization)%>%
+  arrange(desc(n))
+
+head(Patentnumber,10)
+
+Picture_table<-Patentnumber%>%
+  slice(1:10)
+## Visualize
+
+Picture_table %>%
+  
+  # Setup canvas with the columns year (x-axis) and sales (y-axis)
+  ggplot(aes(x = reorder(organization,-n),n, y = n)) +
+  theme(axis.text.x = element_text(angle = 90))+
+  # Geometries
+  geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
+  
+ 
+  
+  # Formatting
+  # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
+  # Again, we have to adjust it for euro values
+  labs(
+    title    = "Number of Patents for different US Companies",
+    
+    x = "", # Override defaults for x and y
+    y = "Number of Assigned Patents"
+  )
+
+
+```
 # Adding R stuff
 
 So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. 
