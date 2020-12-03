@@ -46,3 +46,7 @@ vignettes/*.pdf
 00_Data/04_Loans/__MACOSX/loan_data/._Performance_2019Q1.txt
 00_Data/04_Loans/loan_data/Acquisition_2019Q1.txt
 00_Data/04_Loans/loan_data/Performance_2019Q1.txt
+*.tsv
+docs/00_Data/04_Loans/__MACOSX/loan_data/._Acquisition_2019Q1.txt
+docs/00_Data/04_Loans/__MACOSX/loan_data/._Performance_2019Q1.txt
+*.txt

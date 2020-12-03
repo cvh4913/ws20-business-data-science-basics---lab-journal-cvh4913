@@ -434,79 +434,249 @@ div.tocify {
 <div id="data-wrangling" class="section level1">
 <h1><span class="header-section-number">2</span> Data Wrangling</h1>
 <p>Last compiled: 2020-12-03</p>
-<p>The third task is to learn Data Wrangling. The code for practice is the following</p>
-<pre class="r"><code>source(&#39;00_scripts/Data_wrangling.R&#39;, echo = TRUE)</code></pre>
-<pre><code>## 
-## &gt; library(&quot;tidyverse&quot;)
-## 
-## &gt; library(&quot;readxl&quot;)
-## 
-## &gt; library(&quot;lubridate&quot;)
-## 
-## &gt; library(&quot;writexl&quot;)
-## 
-## &gt; library(&quot;RSQLite&quot;)
-## 
-## &gt; library(&quot;DBI&quot;)
-## 
-## &gt; library(&quot;httr&quot;)
-## 
-## &gt; library(&quot;glue&quot;)
-## 
-## &gt; library(&quot;jsonlite&quot;)
-## 
-## &gt; library(&quot;rvest&quot;)
-## 
-## &gt; library(&quot;purrr&quot;)
-## 
-## &gt; library(&quot;xopen&quot;)
-## 
-## &gt; library(&quot;stringi&quot;)
-## 
-## &gt; bikedata &lt;- read_excel(&quot;00_Data/01_bike_sales/01_raw_data/bikes.xlsx&quot;)
-## 
-## &gt; biketbl_1 &lt;- bikedata %&gt;% select(bike.id, model, model.year)
-## 
-## &gt; biketbl_2 &lt;- bikedata %&gt;% select(1:3)
-## 
-## &gt; biketbl_3 &lt;- bikedata %&gt;% select(1, contains(&quot;model&quot;))
-## 
-## &gt; model_and_price &lt;- bikedata %&gt;% select(&quot;model&quot;, &quot;price&quot;)
-## 
-## &gt; bikedata %&gt;% select(contains(&quot;category&quot;), everything())
-## # A tibble: 231 x 9
-##    category  bike.id model model.year frame.material weight price gender url    
-##    &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;  
-##  1 Road - R~    2875 Aero~       2020 carbon           7.6   4579 unisex https:~
-##  2 Road - R~    2873 Aero~       2020 carbon           7.27  6919 unisex https:~
-##  3 Road - R~    2874 Aero~       2020 carbon           7.1   6429 unisex https:~
-##  4 Road - R~    2876 Aero~       2020 carbon           7.73  5069 unisex https:~
-##  5 Road - R~    2877 Aero~       2020 carbon           7.83  3609 unisex https:~
-##  6 Road - R~    2225 Aero~       2019 carbon           6.8   6139 unisex https:~
-##  7 Road - R~    2091 Aero~       2019 carbon           6.8   5359 unisex https:~
-##  8 Road - R~    2086 Aero~       2021 carbon           7.6   2629 unisex https:~
-##  9 Road - R~    2088 Aero~       2020 carbon           7.3   3699 unisex https:~
-## 10 Road - R~    2120 Aero~       2020 carbon           7.2   3219 female https:~
-## # ... with 221 more rows
-## 
-## &gt; mean_price &lt;- bikedata %&gt;% pull(price) %&gt;% mean()
-## 
-## &gt; char &lt;- bikedata %&gt;% select(where(is.character))
-## 
-## &gt; numerical &lt;- bikedata %&gt;% select(where(is.numeric))
-## 
-## &gt; nonnumerical &lt;- bikedata %&gt;% select(!where(is.numeric))
-## 
-## &gt; bikedata &lt;- bikedata %&gt;% separate(col = category, 
-## +     into = c(&quot;category_1&quot;, &quot;category_2&quot;, &quot;category_3&quot;), sep = &quot; - &quot;)
-## 
-## &gt; bikedata1_7 &lt;- bikedata %&gt;% select(model, contains(&quot;category&quot;), 
-## +     price) %&gt;% rename(Model = model, `Bike Familiy` = category_1, 
-## +     `Ride St .... [TRUNCATED] 
-## 
-## &gt; bikedata1_8 &lt;- bikedata %&gt;% select(model, contains(&quot;category&quot;), 
-## +     price) %&gt;% set_names(c(&quot;Model&quot;, &quot;Bike Family&quot;, &quot;Bike Ridestyle&quot;, 
-## +     &quot;Bike ...&quot; ... [TRUNCATED]</code></pre>
+<p>In the Third challenge, patents of various companies should be analized.</p>
+<div id="section" class="section level2">
+<h2><span class="header-section-number">2.1</span> 3.1</h2>
+<p>The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the “assignee” and “patent_assignee” datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated</p>
+<p><img src="02_figures/Most_Patents_assigned_US.png" alt="Firure: Sales for different Cities" /> The 10 most effective companies in terms of patent assignement are listed on the ordinate. The code to this graph is the following.</p>
+<pre class="r"><code>library(vroom)
+library(tidyverse)
+library(data.table)
+
+
+&#39;col_types &lt;- list(
+  id = col_integer(),
+  type = col_character(),
+  number = col_integer(),
+  country = col_character(),
+  date = col_date(&quot;%Y-%m-%d&quot;),
+  abstract = col_character(),
+  title = col_character(),
+  kind = col_character(),
+  num_claims = col_double(),
+  filename = col_character(),
+  withdrawn = col_character()
+)
+
+patent_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/patent.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+#glimpse(patent_tbl)&#39;
+
+col_types &lt;- list(
+  patent_id = col_integer(),
+  assignee_id = col_character(),
+  location_id = col_character()
+  )
+
+patent_assignee_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/patent_assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+col_types &lt;- list(
+  id = col_character(),
+  type = col_integer(),
+  name_first = col_character(),
+  name_last = col_character(),
+  organization = col_character()
+)
+
+assignee_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+&#39;col_types &lt;- list(
+  uuid = col_character(),
+  patent_id = integer(),
+  mainclass_id = col_integer(),
+  subclass_id = col_character(),
+  sequence = col_integer()
+)
+
+uspc_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/uspc.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)&#39;
+glimpse(patent_assignee_tbl)
+glimpse(assignee_tbl)
+#1. Which US Company has the most Patents
+#join data 
+wrangeled&lt;-left_join(patent_assignee_tbl,assignee_tbl,by = c(&quot;assignee_id&quot;=&quot;id&quot;))
+#only patents od US Companies shall be counted e.g. the type has to be exactly 2
+
+
+wrangeled&lt;-wrangeled%&gt;%
+  filter(type == 2)%&gt;%
+  select(organization, patent_id, everything())%&gt;%
+  select(-name_first, -name_last, -location_id, -assignee_id)%&gt;%
+  arrange(desc(organization))
+
+
+Patentnumber&lt;-wrangeled%&gt;%
+  filter(!is.na(patent_id))%&gt;%
+  count(organization)%&gt;%
+  arrange(desc(n))
+
+head(Patentnumber,10)
+
+Picture_table&lt;-Patentnumber%&gt;%
+  slice(1:10)
+## Visualize
+
+Picture_table %&gt;%
+  
+  # Setup canvas with the columns year (x-axis) and sales (y-axis)
+  ggplot(aes(x = reorder(organization,-n),n, y = n)) +
+  theme(axis.text.x = element_text(angle = 90))+
+  # Geometries
+  geom_col(fill = &quot;#2DC6D6&quot;) + # Use geom_col for a bar plot
+  
+ 
+  
+  # Formatting
+  # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
+  # Again, we have to adjust it for euro values
+  labs(
+    title    = &quot;Number of Patents for different US Companies&quot;,
+    
+    x = &quot;&quot;, # Override defaults for x and y
+    y = &quot;Number of Assigned Patents&quot;
+  )</code></pre>
+<p>##3.2</p>
+<p>In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were sutracted the top the was distributed differently than the query from before.</p>
+<p><img src="02_figures/Most_Patents_2019_US.png" alt="Firure: Sales for different Cities" /> The used code is given here:</p>
+<pre class="r"><code>#librarys
+
+
+library(vroom)
+library(tidyverse)
+library(data.table)
+
+
+col_types &lt;- list(
+  id = col_integer(),
+  type = col_skip(),
+  number = col_integer(),
+  country = col_character(),
+  date = col_date(&quot;%Y-%m-%d&quot;),
+  abstract = col_skip(),
+  title = col_skip(),
+  kind = col_skip(),
+  num_claims = col_double(),
+  filename = col_skip(),
+  withdrawn = col_character()
+)
+
+patent_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/patent.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+#glimpse(patent_tbl)&#39;
+
+col_types &lt;- list(
+  patent_id = col_integer(),
+  assignee_id = col_character(),
+  location_id = col_character()
+  )
+
+patent_assignee_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/patent_assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+col_types &lt;- list(
+  id = col_character(),
+  type = col_integer(),
+  name_first = col_skip(),
+  name_last = col_skip(),
+  organization = col_character()
+)
+
+assignee_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+&#39;col_types &lt;- list(
+  uuid = col_character(),
+  patent_id = integer(),
+  mainclass_id = col_integer(),
+  subclass_id = col_character(),
+  sequence = col_integer()
+)
+
+uspc_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/uspc.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)&#39;
+glimpse(patent_assignee_tbl)
+glimpse(assignee_tbl)
+#1. Which US Company has the most Patents
+#aufbereitung der Daten 
+
+patent_tbl&lt;-patent_tbl%&gt;%
+  filter(country == &quot;US&quot;)%&gt;%
+  filter(!is.na(id))%&gt;%
+  mutate(year=year(date))%&gt;%
+  filter(year==2019)
+  
+assignee_tbl&lt;-assignee_tbl%&gt;%
+  filter(type==2)
+
+
+data&lt;-left_join(patent_assignee_tbl,assignee_tbl,by=c(&quot;assignee_id&quot;=&quot;id&quot;))
+data&lt;-left_join(data,patent_tbl,by=c(&quot;patent_id&quot;=&quot;id&quot;))
+data&lt;-data%&gt;%
+  filter((!is.na(year))&amp;!is.na(organization))
+
+res&lt;-data%&gt;%
+  count(organization)%&gt;%
+  arrange(desc(n))%&gt;%
+  slice(1:10)
+
+## Visualize
+
+res %&gt;%
+  
+  # Setup canvas with the columns year (x-axis) and sales (y-axis)
+  ggplot(aes(x = reorder(organization,-n),n, y = n)) +
+  theme(axis.text.x = element_text(angle = 90))+
+  # Geometries
+  geom_col(fill = &quot;#2DC6D6&quot;) + # Use geom_col for a bar plot
+  
+  
+  
+  # Formatting
+  # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
+  # Again, we have to adjust it for euro values
+  labs(
+    title    = &quot;Number of Patents for different US Companies&quot;,
+    
+    x = &quot;&quot;, # Override defaults for x and y
+    y = &quot;Number of Assigned Patents&quot;
+  )</code></pre>
+</div>
 </div>
 <div id="adding-r-stuff" class="section level1">
 <h1><span class="header-section-number">3</span> Adding R stuff</h1>
@@ -514,7 +684,7 @@ div.tocify {
 <p>So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
 <pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
 hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You’ll learn that all of these things and more can be customized in each R code block.</p>
 </div>
 
