@@ -414,8 +414,11 @@ div.tocify {
 <p>This is an <code>.Rmd</code> file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.</p>
 <p>Last compiled: 2020-12-03</p>
 <p>Notice that whatever you define as a top level header, automatically gets put into the table of contents bar on the left.</p>
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> introduction</h1>
+</div>
 <div id="first-assignement-bike-sales-at-different-cities-in-germany" class="section level1">
-<h1><span class="header-section-number">1</span> First Assignement: Bike Sales at different cities in germany</h1>
+<h1><span class="header-section-number">2</span> First Assignement: Bike Sales at different cities in germany</h1>
 <p>The assignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plotable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019</p>
 <div class="figure">
 <img src="02_figures/Revenue_by_years_and_cities.png" alt="" />
@@ -423,20 +426,20 @@ div.tocify {
 </div>
 <pre class="r"><code>source(&#39;01_getting_Started/getting_Started.R&#39;, echo = FALSE)</code></pre>
 <div id="second-level-header" class="section level2">
-<h2><span class="header-section-number">1.1</span> Second level header</h2>
+<h2><span class="header-section-number">2.1</span> Second level header</h2>
 <p>You can add more headers by adding more hashtags. These won’t be put into the table of contents</p>
 <div id="third-level-header" class="section level3">
-<h3><span class="header-section-number">1.1.1</span> third level header</h3>
+<h3><span class="header-section-number">2.1.1</span> third level header</h3>
 <p>Here’s an even lower level header</p>
 </div>
 </div>
 </div>
 <div id="data-wrangling" class="section level1">
-<h1><span class="header-section-number">2</span> Data Wrangling</h1>
+<h1><span class="header-section-number">3</span> Data Wrangling</h1>
 <p>Last compiled: 2020-12-03</p>
 <p>In the Third challenge, patents of various companies should be analized.</p>
-<div id="section" class="section level2">
-<h2><span class="header-section-number">2.1</span> 3.1</h2>
+<div id="companies-with-the-most-patent-activities-in-the-us" class="section level2">
+<h2><span class="header-section-number">3.1</span> Companies with the most patent activities in the US</h2>
 <p>The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the “assignee” and “patent_assignee” datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated</p>
 <p><img src="02_figures/Most_Patents_assigned_US.png" alt="Firure: Sales for different Cities" /> The 10 most effective companies in terms of patent assignement are listed on the ordinate. The code to this graph is the following.</p>
 <pre class="r"><code>library(vroom)
@@ -554,7 +557,9 @@ Picture_table %&gt;%
     x = &quot;&quot;, # Override defaults for x and y
     y = &quot;Number of Assigned Patents&quot;
   )</code></pre>
-<p>##3.2</p>
+</div>
+<div id="companies-with-the-most-granted-patents-in-2019" class="section level2">
+<h2><span class="header-section-number">3.2</span> Companies with the most granted patents in 2019</h2>
 <p>In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were sutracted the top the was distributed differently than the query from before.</p>
 <p><img src="02_figures/Most_Patents_2019_US.png" alt="Firure: Sales for different Cities" /> The used code is given here:</p>
 <pre class="r"><code>#librarys
@@ -677,14 +682,214 @@ res %&gt;%
     y = &quot;Number of Assigned Patents&quot;
   )</code></pre>
 </div>
+<div id="assignement-over-uspss" class="section level2">
+<h2><span class="header-section-number">3.3</span> Assignement over usps’s</h2>
+<p>in The third assignement of chapter 4 the top 5 Patent classes for the top 10 most active companies with respect to newly assigned patents had to be found. The results can be seen in the following figures. The responsible cod is displayed below.</p>
+<p><img src="02_figures/3_3_1.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_2.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_3.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_4.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_5.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_6.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_7.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_8.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_9.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_10.png" alt="Firure: Sales for different Cities" /></p>
+<pre class="r"><code>#librarys
+get_patent_classes &lt;- function(tbl,companie){
+  
+  tbl%&gt;%
+    filter(organization %in% companie)%&gt;%
+    count(mainclass_id)%&gt;%
+    arrange(desc(n))%&gt;%
+    slice(1:5)  
+}
+
+build_figure &lt;- function(list,i,j){
+  
+  as_tibble(list[c(i,i+1)]) %&gt;%
+    
+    # Set up x, y, fill
+    ggplot(aes(x = reorder(mainclass_id,-n),n, y = n, fill = mainclass_id)) +
+    theme(axis.text.x = element_text(angle = 90))+
+    
+    # Geometries
+    geom_col() + # Run up to here to get a stacked bar plot
+    geom_smooth(method = &quot;lm&quot;, se = FALSE) + # Adding a trendline
+    
+    
+    
+    # Formatting
+    
+    
+    labs(
+      title = relevant_companies[j],
+      
+      fill = &quot;Main category&quot; # Changes the legend name
+      
+    )
+  
+  
+  
+}
+  
+  
+
+
+
+library(vroom)
+library(tidyverse)
+library(data.table)
+
+
+&#39;col_types &lt;- list(
+  id = col_integer(),
+  type = col_character(),
+  number = col_integer(),
+  country = col_character(),
+  date = col_date(&quot;%Y-%m-%d&quot;),
+  abstract = col_character(),
+  title = col_character(),
+  kind = col_character(),
+  num_claims = col_double(),
+  filename = col_character(),
+  withdrawn = col_character()
+)
+
+patent_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/patent.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+#glimpse(patent_tbl)&#39;
+
+col_types &lt;- list(
+  patent_id = col_integer(),
+  assignee_id = col_character(),
+  location_id = col_skip()
+  )
+
+patent_assignee_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/patent_assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+col_types &lt;- list(
+  id = col_character(),
+  type = col_integer(),
+  name_first = col_skip(),
+  name_last = col_skip(),
+  organization = col_character()
+)
+
+assignee_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+col_types &lt;- list(
+  uuid = col_skip(),
+  patent_id = col_integer(),
+  mainclass_id = col_integer(),
+  subclass_id = col_skip(),
+  sequence = col_skip()
+)
+
+uspc_tbl &lt;- vroom(
+  file       = &quot;00_Data/03_patents/uspc.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+
+
+#cleaning the data befor joining
+#only companies are important, therefore everything except companies is cleaned from the assignee_tbl which would mean only type 2 and 3 are considered
+
+#derive best 2 companies world wide
+
+assignee_tbl&lt;-assignee_tbl%&gt;%
+  filter((type==2)|(type==3))
+
+relevant_patents_tbl&lt;-left_join(assignee_tbl,patent_assignee_tbl,by=c(&quot;id&quot;=&quot;assignee_id&quot;))
+
+relevant_patents_tbl&lt;-relevant_patents_tbl%&gt;%
+  filter(!is.na(patent_id))
+
+#get all patent ids which are relevant for this process because they are left in the relevant dataset
+patent_vec&lt;-pull(relevant_patents_tbl,patent_id)
+
+
+#filter the uspc tibble to reduce its size
+uspc_tbl&lt;-uspc_tbl%&gt;%
+  filter(patent_id %in% (patent_vec))%&gt;%
+  distinct() # the patents are still saved multiple times because of the sub classes which are not nessecary here. Distinct to get rid of thart problem
+
+
+relevant_patents_tbl&lt;-left_join(relevant_patents_tbl,uspc_tbl,by=c(&quot;patent_id&quot;=&quot;patent_id&quot;))
+#filter to get rid of each patent which does not have a main class ID
+relevant_patents_tbl&lt;-relevant_patents_tbl%&gt;%
+  filter((!is.na(mainclass_id))&amp;(!is.na(organization)))
+
+#find the most innovative tech sector
+tech&lt;-relevant_patents_tbl%&gt;%
+  count(mainclass_id)%&gt;%
+  arrange(desc(n))%&gt;%
+  slice(1:10)
+#found most innovative tech sectors
+
+#find the top ten most innovative countries worldwide
+number_of_patents&lt;-  relevant_patents_tbl%&gt;%
+  group_by(organization)%&gt;%
+  summarize(
+    count=n()
+  )%&gt;%
+  ungroup()%&gt;%
+  arrange(desc(count))%&gt;%
+  slice(1:10)
+
+relevant_companies&lt;-pull(number_of_patents,organization) 
+
+c1&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[1])
+
+c2&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[2])
+
+c3&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[3])
+
+c4&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[4])
+
+c5&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[5])
+
+c6&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[6])
+
+c7&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[7])
+
+c8&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[8])
+
+c9&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[9])
+
+c10&lt;-get_patent_classes(relevant_patents_tbl,relevant_companies[10])
+
+c_vec&lt;-c(c1,c2,c3,c4,c5,c6,c7,c8,c9,c10)
+
+
+build_figure(c_vec,1,1)
+build_figure(c_vec,3,2)
+build_figure(c_vec,5,3)
+build_figure(c_vec,7,4)  
+build_figure(c_vec,9,5)
+build_figure(c_vec,11,6)
+build_figure(c_vec,13,7)
+build_figure(c_vec,15,8)  
+build_figure(c_vec,17,9)
+build_figure(c_vec,19,10)</code></pre>
+</div>
 </div>
 <div id="adding-r-stuff" class="section level1">
-<h1><span class="header-section-number">3</span> Adding R stuff</h1>
+<h1><span class="header-section-number">4</span> Adding R stuff</h1>
 <p>So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place.</p>
 <p>So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
 <pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
 hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You’ll learn that all of these things and more can be customized in each R code block.</p>
 </div>
 

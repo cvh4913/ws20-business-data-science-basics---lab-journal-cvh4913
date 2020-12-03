@@ -114,3 +114,5 @@ Picture_table %>%
     y = "Number of Assigned Patents"
   )
 
+
+
