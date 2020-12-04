@@ -410,21 +410,220 @@ div.tocify {
 </div>
 
 
-<p><strong>IMPORTANT:</strong> You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.</p>
-<p>This is an <code>.Rmd</code> file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.</p>
-<p>Last compiled: 2020-12-03</p>
-<p>Notice that whatever you define as a top level header, automatically gets put into the table of contents bar on the left.</p>
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> introduction</h1>
 </div>
 <div id="first-assignement-bike-sales-at-different-cities-in-germany" class="section level1">
 <h1><span class="header-section-number">2</span> First Assignement: Bike Sales at different cities in germany</h1>
-<p>The assignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plotable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019</p>
-<div class="figure">
-<img src="02_figures/Revenue_by_years_and_cities.png" alt="" />
-<p class="caption">Firure: Sales for different Cities</p>
-</div>
-<pre class="r"><code>source(&#39;01_getting_Started/getting_Started.R&#39;, echo = FALSE)</code></pre>
+<p>The assignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plotable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019. The result is given in the figure below. Especially Dortmund, Breen and Wuppertal had a large amount of Bike sales from 2015 to 2019.</p>
+<p><img src="02_figures/Revenue_by_years_and_cities.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/Revenue_by_years_and_states.png" alt="Firure: Sales for different Cities" /> The result of the question which state has the highest revenue is: North-Rhine_Wesphalia.</p>
+<pre class="r"><code># Data Science at TUHH ------------------------------------------------------
+# SALES ANALYSIS ----
+
+# 1.0 Load libraries ----
+library(&quot;tidyverse&quot;);
+library(&quot;readxl&quot;);
+library(&quot;lubridate&quot;)
+library(&quot;writexl&quot;)
+
+# 2.0 Importing Files ----
+bike_data&lt;-read_excel(&quot;00_Data/01_bike_sales/01_raw_data/bikes.xlsx&quot;);
+shop_data&lt;-read_excel(&quot;00_Data/01_bike_sales/01_raw_data/bikeshops.xlsx&quot;);
+order_data&lt;-read_excel(&quot;00_Data/01_bike_sales/01_raw_data/orderlines.xlsx&quot;);
+
+# 3.0 Examining Data ----
+#order_data
+
+# 4.0 Joining Data ----
+glimpse(order_data)
+whole_data&lt;-left_join(order_data,bike_data,by =c(&quot;product.id&quot;=&quot;bike.id&quot;));
+whole_data&lt;-left_join(whole_data,shop_data,by =c(&quot;customer.id&quot;=&quot;bikeshop.id&quot;));
+
+# 5.0 Wrangling Data ---- 
+whole_data &lt;-whole_data %&gt;% 
+  mutate(total.price=price*quantity)%&gt;%
+  select(order.id, contains(&quot;order&quot;), contains(&quot;model&quot;), contains(&quot;category&quot;),price, quantity, total.price,everything())%&gt;%
+  
+  separate(col=&quot;category&quot;, into=c(&quot;C1&quot;, &quot;C2&quot;, &quot;C3&quot;), sep = &quot; - &quot;)%&gt;%
+  separate(col=&quot;location&quot;, into=c(&quot;City&quot;,&quot;State&quot;),sep =&quot;, &quot;)
+
+
+whole_data&lt;-whole_data%&gt;%select(-...1,-gender,-url) %&gt;%
+
+  rename(bikeshop = name) %&gt;%
+  set_names(names(.) %&gt;% str_replace_all(&quot;\\.&quot;, &quot;_&quot;))
+glimpse(whole_data)
+
+
+# 6.0 Business Insights ----
+#rearrange data
+#goal -&gt; have the data plottable
+
+sb_year&lt;-whole_data %&gt;%
+    select(order_date,total_price);
+
+
+  
+# 6.1 Sales by Year ----
+
+
+# Step 1 - Manipulate
+sb_year&lt;-sb_year %&gt;% mutate(year=year(order_date))%&gt;%
+  select(-order_date)%&gt;%
+  group_by(year)%&gt;%
+  summarize(sales=sum(total_price))%&gt;%
+  mutate(sales_text = scales::dollar(sales, big.mark = &quot;.&quot;, 
+                                     decimal.mark = &quot;,&quot;, 
+                                     prefix = &quot;&quot;, 
+                                     suffix = &quot; €&quot;));
+# Step 2 - Visualize
+
+
+# 6.2 Sales by Year and Category 2 ----
+
+sb_cat&lt;-whole_data %&gt;%
+  select(C1,total_price,order_date);
+
+# Step 1 - Manipulate
+
+sb_cat&lt;-sb_cat%&gt;% 
+  mutate(year=year(order_date))%&gt;%
+  select(-order_date)%&gt;%
+  
+  
+ 
+  group_by(year,C1)%&gt;%
+  summarize(sales=sum(total_price))%&gt;%
+  ungroup()%&gt;%
+  mutate(sales_text = scales::dollar(sales, big.mark = &quot;.&quot;, 
+                                     decimal.mark = &quot;,&quot;, 
+                                     prefix = &quot;&quot;, 
+                                     suffix = &quot; €&quot;));
+
+
+
+
+
+# 6.3 Challenge Assignement Cities and States ----
+
+
+sales_by_Cities&lt;-whole_data %&gt;%
+  select(City,total_price,State,order_date)%&gt;%
+  mutate(year=year(order_date))%&gt;%
+  select(-order_date)%&gt;%
+  group_by(City,State,year)%&gt;%
+  summarize(sales=sum(total_price))%&gt;%
+  ungroup()%&gt;%
+  mutate(sales_text = scales::dollar(sales, big.mark = &quot;.&quot;, 
+                                     decimal.mark = &quot;,&quot;, 
+                                     prefix = &quot;&quot;, 
+                                     suffix = &quot; €&quot;));
+
+sales_by_State&lt;-whole_data%&gt;%
+  select(total_price,State,order_date)%&gt;%
+  mutate(year=year(order_date))%&gt;%
+  select(-order_date)%&gt;%
+  group_by(State,year)%&gt;%
+  summarize(sales=sum(total_price))%&gt;%
+  ungroup()%&gt;%
+  mutate(sales_text = scales::dollar(sales, big.mark = &quot;.&quot;, 
+                                     decimal.mark = &quot;,&quot;, 
+                                     prefix = &quot;&quot;, 
+                                     suffix = &quot; €&quot;));
+
+
+
+
+
+
+
+# Step 2 - Visualize
+
+
+
+# Visualize the challenge task ----
+
+
+
+
+sales_by_Cities %&gt;%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = year, y = sales, fill = City)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  
+  
+  # Facet
+  facet_wrap(~ City) +
+  
+  # Formatting
+  scale_y_continuous(labels = scales::dollar_format(big.mark = &quot;.&quot;, 
+                                                    decimal.mark = &quot;,&quot;, 
+                                                    prefix = &quot;&quot;, 
+                                                    suffix = &quot; €&quot;)) +
+  
+  labs(
+    title = &quot;Revenue by year and cities&quot;,
+    subtitle = &quot;The Trends in different cities are very different&quot;,
+    fill = &quot;Main category&quot; # Changes the legend name
+    
+  )
+
+# Visualize the challenge task ----
+
+
+
+
+sales_by_State %&gt;%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = year, y = sales, fill = State)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  
+  
+  # Facet
+  facet_wrap(~ State) +
+  
+  # Formatting
+  scale_y_continuous(labels = scales::dollar_format(big.mark = &quot;.&quot;, 
+                                                    decimal.mark = &quot;,&quot;, 
+                                                    prefix = &quot;&quot;, 
+                                                    suffix = &quot; €&quot;)) +
+  
+  labs(
+    title = &quot;Revenue by year and state&quot;,
+    subtitle = &quot;The Trends in different states with North-Rhine-Westphalia leading ahead of Bremen&quot;,
+    fill = &quot;Main category&quot; # Changes the legend name
+    
+  )
+
+
+# 7.0 Writing Files ----
+
+
+
+
+# 7.1 Excel ----
+sb_year %&gt;%
+  write_xlsx(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year.xlsx&quot;)
+sb_cat %&gt;%
+  write_xlsx(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year_and_Category_1.xlsx&quot;)
+
+# 7.2 CSV ----
+sb_year %&gt;% 
+  write_csv(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year.csv&quot;)
+sb_cat %&gt;%
+  write_csv(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year_and_Category_1.csv&quot;)
+
+# 7.3 RDS ----
+sb_year %&gt;% 
+  write_rds(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year.rds&quot;)
+sb_cat %&gt;%
+  write_rds(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year_and_Category_1.rds&quot;)</code></pre>
 <div id="second-level-header" class="section level2">
 <h2><span class="header-section-number">2.1</span> Second level header</h2>
 <p>You can add more headers by adding more hashtags. These won’t be put into the table of contents</p>
@@ -434,12 +633,160 @@ div.tocify {
 </div>
 </div>
 </div>
+<div id="data-acquisition" class="section level1">
+<h1><span class="header-section-number">3</span> Data Acquisition</h1>
+<p>The Data Acquisition chapters topic is web scraping. This can be useful if the acquisition of huge data sets for competitor data is needed. R i able to communicate with html and css scripts of which websites are composted. The exercise was conducted to learn a bit abourt html, css and the corresponding routines in R. As the challenge, some data should be scraped from another wesite. This is done with the Rosebikes website. The results are shown in the following.</p>
+<pre class="r"><code>test&lt;-readRDS(&quot;00_Data/01_bike_challenge/bikes_tbl.rds&quot;)%&gt;%head(10)
+test</code></pre>
+<pre><code>## # A tibble: 10 x 6
+##    position subdirectory   category class_url          value           price    
+##       &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;    &lt;glue&gt;             &lt;chr&gt;           &lt;chr&gt;    
+##  1        1 GROUND CONTROL mtb      https://www.roseb~ /fahrräder/mtb~ &quot;1.699,0~
+##  2        2 ROOT MILLER    mtb      https://www.roseb~ /fahrräder/mtb~ &quot;1.999,0~
+##  3        3 PIKES PEAK     mtb      https://www.roseb~ /fahrräder/mtb~ &quot;3.099,0~
+##  4        4 THE BRUCE      mtb      https://www.roseb~ /fahrräder/mtb~ &quot;\n&quot;     
+##  5        5 COUNT SOLO     mtb      https://www.roseb~ /fahrräder/mtb~ &quot;\n&quot;     
+##  6        6 PSYCHO PATH    mtb      https://www.roseb~ /fahrräder/mtb~ &quot;\n ab 1~
+##  7        7 THRILL HILL    mtb      https://www.roseb~ /fahrräder/mtb~ &quot;2.599,0~
+##  8        8 THRILL HILL T~ mtb      https://www.roseb~ &lt;NA&gt;             &lt;NA&gt;    
+##  9        9 SOUL FIRE      mtb      https://www.roseb~ /fahrräder/mtb~ &quot;2.149,0~
+## 10        1 PRO SL DISC    rennrad  https://www.roseb~ /fahrräder/ren~ &quot;1.599,0~</code></pre>
+<p>There has been a data tibble derived from the “rosebikes.de” website of which 10 rows can be seen above. Using the Data connected here, further investigations could be possible.</p>
+<p>The code written for this purpose is given here:</p>
+<pre class="r"><code># Data Science at TUHH ------------------------------------------------------
+# SALES ANALYSIS ----
+
+bikeclasses_tbl&lt;-function(url,integer,family,family_id_url){
+  
+  bike_name_tbl &lt;- url %&gt;%
+    read_html()%&gt;%
+    html_nodes(css = &quot;.catalog-category-bikes__title-text&quot;) %&gt;% 
+    
+    html_text() %&gt;%
+    str_remove(pattern = &quot;\n&quot;) %&gt;%
+    str_remove(pattern = &quot;\n&quot;) %&gt;%
+    # Convert vector to tibble
+    enframe(name = &quot;position&quot;, value = &quot;subdirectory&quot;) %&gt;%
+    mutate(category = family[integer])%&gt;%
+    mutate(class_url = family_id_url[integer])
+    
+  
+}
+
+
+# 1.0 Load libraries ----
+library(&quot;tidyverse&quot;)
+library(&quot;readxl&quot;)
+library(&quot;lubridate&quot;)
+library(&quot;writexl&quot;)
+library(&quot;RSQLite&quot;)
+library(&quot;DBI&quot;)
+library(&quot;httr&quot;)
+library(&quot;glue&quot;)
+library(&quot;jsonlite&quot;)
+library(&quot;rvest&quot;)
+library(&quot;purrr&quot;)
+library(&quot;xopen&quot;)
+library(&quot;stringi&quot;)
+
+
+
+
+#gotten canyon url stuff and ready for analysis
+
+# 1.1 COLLECT PRODUCT FAMILIES ----
+
+url_home          &lt;- &quot;https://www.rosebikes.de/fahrräder&quot;
+#xopen(url_home) # Open links directly from RStudio to inspect them
+
+# Read in the HTML for the entire webpage
+html_home         &lt;- read_html(url_home)
+
+# Web scrape the ids for the families
+bike_family_tbl &lt;- html_home %&gt;%
+  
+  # Get the nodes for the families ...
+  html_nodes(css = &quot;.catalog-navigation__link&quot;) %&gt;%
+  # ...and extract the information of the id attribute
+  html_attr(&#39;href&#39;) %&gt;%
+  
+  discard(.p = ~stringr::str_detect(.x,&quot;Sale|Finder|Kinder&quot;)) %&gt;%
+  
+  # Convert vector to tibble
+  enframe(name = &quot;position&quot;, value = &quot;family_class&quot;)%&gt;%
+  
+  # build individual urls for each category page
+  mutate(
+    family_url = str_glue(&quot;https://www.rosebikes.de{family_class}&quot;)
+  )
+
+bike_family_tbl
+
+# 1.2 COLLECT PRODUCT CATEGORIES ----
+
+# Combine all Ids to one string so that we will get all nodes at once
+# (seperated by the OR operator &quot;,&quot;)
+family_id_url &lt;- bike_family_tbl %&gt;%
+  pull(family_url)
+
+bike_family&lt;-bike_family_tbl%&gt;%
+  pull(family_url)%&gt;%
+  str_remove(pattern = &quot;https://www.rosebikes.de/fahrräder/&quot;)
+  
+family_id_url
+url&lt;-family_id_url[1]
+
+bikes_tbl&lt;-bikeclasses_tbl(family_id_url[1],1,bike_family,family_id_url)
+for(i in 2:12){
+  
+  add&lt;-bikeclasses_tbl(family_id_url[i],i,bike_family,family_id_url)
+  bikes_tbl&lt;-add_row(bikes_tbl,add)
+  
+}
+
+#===================================================================
+#versuch mit mutate eine weitere Spalte zu bikes_tbl hinzuzufügen
+for(i in 1:nrow(bike_family_tbl)){
+  add&lt;-family_id_url[i]%&gt;%
+    read_html()%&gt;%
+    html_nodes(css = &quot;.catalog-category-bikes__content &gt; a&quot;) %&gt;%
+    html_attr(&quot;href&quot;) %&gt;%
+    as_tibble%&gt;%
+    mutate(Name= family_id_url[i]%&gt;%
+             read_html()%&gt;%
+             html_nodes(css = &quot;.catalog-category-bikes__title-text&quot;) %&gt;%
+             html_text() %&gt;%
+             str_remove(pattern = &quot;\n&quot;) %&gt;%
+             str_remove(pattern = &quot;\n&quot;) 
+    
+  )%&gt;%
+  mutate(price=family_id_url[i]%&gt;%
+           read_html()%&gt;%
+           html_nodes(css = &quot;.catalog-category-bikes__price-title&quot;) %&gt;%
+           html_text()%&gt;%
+           str_remove(pattern = &quot;\nab &quot;)
+           
+           )
+    
+    if (i==1) {
+      misc_bikedata&lt;-add
+    } else {
+      misc_bikedata&lt;-add_row(misc_bikedata,add)
+    }
+  
+}
+
+bikes_tbl&lt;-left_join(bikes_tbl,misc_bikedata,by=c(&quot;subdirectory&quot;=&quot;Name&quot;))
+
+bikes_tbl %&gt;% 
+  write_rds(&quot;00_Data/01_bike_challenge/bikes_tbl.rds&quot;)</code></pre>
+</div>
 <div id="data-wrangling" class="section level1">
-<h1><span class="header-section-number">3</span> Data Wrangling</h1>
-<p>Last compiled: 2020-12-03</p>
+<h1><span class="header-section-number">4</span> Data Wrangling</h1>
+<p>Last compiled: 2020-12-04</p>
 <p>In the Third challenge, patents of various companies should be analized.</p>
 <div id="companies-with-the-most-patent-activities-in-the-us" class="section level2">
-<h2><span class="header-section-number">3.1</span> Companies with the most patent activities in the US</h2>
+<h2><span class="header-section-number">4.1</span> Companies with the most patent activities in the US</h2>
 <p>The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the “assignee” and “patent_assignee” datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated</p>
 <p><img src="02_figures/Most_Patents_assigned_US.png" alt="Firure: Sales for different Cities" /> The 10 most effective companies in terms of patent assignement are listed on the ordinate. The code to this graph is the following.</p>
 <pre class="r"><code>library(vroom)
@@ -559,7 +906,7 @@ Picture_table %&gt;%
   )</code></pre>
 </div>
 <div id="companies-with-the-most-granted-patents-in-2019" class="section level2">
-<h2><span class="header-section-number">3.2</span> Companies with the most granted patents in 2019</h2>
+<h2><span class="header-section-number">4.2</span> Companies with the most granted patents in 2019</h2>
 <p>In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were sutracted the top the was distributed differently than the query from before.</p>
 <p><img src="02_figures/Most_Patents_2019_US.png" alt="Firure: Sales for different Cities" /> The used code is given here:</p>
 <pre class="r"><code>#librarys
@@ -683,7 +1030,7 @@ res %&gt;%
   )</code></pre>
 </div>
 <div id="assignement-over-uspss" class="section level2">
-<h2><span class="header-section-number">3.3</span> Assignement over usps’s</h2>
+<h2><span class="header-section-number">4.3</span> Assignement over usps’s</h2>
 <p>in The third assignement of chapter 4 the top 5 Patent classes for the top 10 most active companies with respect to newly assigned patents had to be found. The results can be seen in the following figures. The responsible cod is displayed below.</p>
 <p><img src="02_figures/3_3_1.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_2.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_3.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_4.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_5.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_6.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_7.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_8.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_9.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_10.png" alt="Firure: Sales for different Cities" /></p>
 <pre class="r"><code>#librarys
@@ -882,15 +1229,6 @@ build_figure(c_vec,15,8)
 build_figure(c_vec,17,9)
 build_figure(c_vec,19,10)</code></pre>
 </div>
-</div>
-<div id="adding-r-stuff" class="section level1">
-<h1><span class="header-section-number">4</span> Adding R stuff</h1>
-<p>So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place.</p>
-<p>So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
-<pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
-hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<p>When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You’ll learn that all of these things and more can be customized in each R code block.</p>
 </div>
 
 

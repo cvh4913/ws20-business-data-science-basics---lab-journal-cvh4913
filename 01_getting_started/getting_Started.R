@@ -113,58 +113,14 @@ sales_by_State<-whole_data%>%
                                      suffix = " €"));
 
 
+
+
+
+
+
 # Step 2 - Visualize
 
-sb_year %>%
-  
-  # Setup canvas with the columns year (x-axis) and sales (y-axis)
-  ggplot(aes(x = year, y = sales)) +
-  
-  # Geometries
-  geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
-  geom_label(aes(label = sales_text)) + # Adding labels to the bars
-  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
-  
-  # Formatting
-  # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
-  # Again, we have to adjust it for euro values
-  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
-                                                    decimal.mark = ",", 
-                                                    prefix = "", 
-                                                    suffix = " €")) +
-  labs(
-    title    = "Revenue by year",
-    subtitle = "Upward Trend",
-    x = "", # Override defaults for x and y
-    y = "Revenue"
-  )
 
-# Visualizing a second plot which should not override the first one
-
-sb_cat %>%
-  
-  # Set up x, y, fill
-  ggplot(aes(x = year, y = sales, fill = C1)) +
-  
-  # Geometries
-  geom_col() + # Run up to here to get a stacked bar plot
-  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
-  
-  # Facet
-  facet_wrap(~ C1) +
-  
-  # Formatting
-  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
-                                                    decimal.mark = ",", 
-                                                    prefix = "", 
-                                                    suffix = " €")) +
-  
-  labs(
-    title = "Revenue by year and main category",
-    subtitle = "Each product category has an upward trend",
-    fill = "Main category" # Changes the legend name
-    
-  )
 
 # Visualize the challenge task ----
 
@@ -175,7 +131,7 @@ sales_by_Cities %>%
   
   # Set up x, y, fill
   ggplot(aes(x = year, y = sales, fill = City)) +
-  
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   # Geometries
   geom_col() + # Run up to here to get a stacked bar plot
   
@@ -192,6 +148,36 @@ sales_by_Cities %>%
   labs(
     title = "Revenue by year and cities",
     subtitle = "The Trends in different cities are very different",
+    fill = "Main category" # Changes the legend name
+    
+  )
+
+# Visualize the challenge task ----
+
+
+
+
+sales_by_State %>%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = year, y = sales, fill = State)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  
+  
+  # Facet
+  facet_wrap(~ State) +
+  
+  # Formatting
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
+                                                    decimal.mark = ",", 
+                                                    prefix = "", 
+                                                    suffix = " €")) +
+  
+  labs(
+    title = "Revenue by year and state",
+    subtitle = "The Trends in different states with North-Rhine-Westphalia leading ahead of Bremen",
     fill = "Main category" # Changes the legend name
     
   )
