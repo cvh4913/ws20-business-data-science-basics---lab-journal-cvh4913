@@ -119,7 +119,8 @@ res %>%
   )
 
 
- 
+res %>% 
+  write_rds("00_Data/03_wrangle_challenge/3_2_corporations.rds")
 
 
 

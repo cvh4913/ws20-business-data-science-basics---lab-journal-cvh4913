@@ -412,6 +412,7 @@ div.tocify {
 
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> introduction</h1>
+<p>This is the Lab Journal for Business Data Science Basics 2020. In the following chapters 4 challenges were to solve. The chapters are composed of a bit of description, the figures bulit by the code, some example tibbles to keep track with the developing code and the codes themselves.</p>
 </div>
 <div id="first-assignement-bike-sales-at-different-cities-in-germany" class="section level1">
 <h1><span class="header-section-number">2</span> First Assignement: Bike Sales at different cities in germany</h1>
@@ -788,7 +789,8 @@ bikes_tbl %&gt;%
 <div id="companies-with-the-most-patent-activities-in-the-us" class="section level2">
 <h2><span class="header-section-number">4.1</span> Companies with the most patent activities in the US</h2>
 <p>The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the “assignee” and “patent_assignee” datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated</p>
-<p><img src="02_figures/Most_Patents_assigned_US.png" alt="Firure: Sales for different Cities" /> The 10 most effective companies in terms of patent assignement are listed on the ordinate. The code to this graph is the following.</p>
+<p><img src="02_figures/Most_Patents_assigned_US.png" alt="Firure: Sales for different Cities" /> The 10 most effective companies in terms of patent assignement are listed on the ordinate. The most dominant company in the US when it comes to patents is the International Busines Machines Cormporation</p>
+<p>The code to this graph is the following.</p>
 <pre class="r"><code>library(vroom)
 library(tidyverse)
 library(data.table)
@@ -907,8 +909,28 @@ Picture_table %&gt;%
 </div>
 <div id="companies-with-the-most-granted-patents-in-2019" class="section level2">
 <h2><span class="header-section-number">4.2</span> Companies with the most granted patents in 2019</h2>
-<p>In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were sutracted the top the was distributed differently than the query from before.</p>
-<p><img src="02_figures/Most_Patents_2019_US.png" alt="Firure: Sales for different Cities" /> The used code is given here:</p>
+<p>In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were subtracted the top the was distributed differently than the query from before.</p>
+<div class="figure">
+<img src="02_figures/Most_Patents_2019_US.png" alt="" />
+<p class="caption">Firure: Sales for different Cities</p>
+</div>
+<p>The 10 companies which are listed in the Figure above are also listed in the tibble which created the figure which is parsed below</p>
+<pre class="r"><code>tibble&lt;-readRDS(&quot;00_Data/03_wrangle_challenge/3_2_corporations.rds&quot;)%&gt;%head(10)
+tibble</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    organization                                    n
+##    &lt;chr&gt;                                       &lt;int&gt;
+##  1 International Business Machines Corporation  9260
+##  2 Intel Corporation                            3496
+##  3 Microsoft Technology Licensing, LLC          3104
+##  4 Apple Inc.                                   2499
+##  5 Ford Global Technologies, LLC                2468
+##  6 Amazon Technologies, Inc.                    2433
+##  7 QUALCOMM Incorporated                        2358
+##  8 Google Inc.                                  2112
+##  9 General Electric Company                     1815
+## 10 Hewlett-Packard Development Company, L.P.    1558</code></pre>
+<p>The used code is given here:</p>
 <pre class="r"><code>#librarys
 
 
@@ -1032,6 +1054,17 @@ res %&gt;%
 <div id="assignement-over-uspss" class="section level2">
 <h2><span class="header-section-number">4.3</span> Assignement over usps’s</h2>
 <p>in The third assignement of chapter 4 the top 5 Patent classes for the top 10 most active companies with respect to newly assigned patents had to be found. The results can be seen in the following figures. The responsible cod is displayed below.</p>
+<div id="most-innovative-tech-sectors" class="section level3">
+<h3><span class="header-section-number">4.3.1</span> Most innovative tech sectors</h3>
+<p>The most innovative tech sector is sector “257”. This can be seen in the figute below.</p>
+<div class="figure">
+<img src="02_figures/tech_sectors.png" alt="" />
+<p class="caption">Firure: Sales for different Cities</p>
+</div>
+</div>
+<div id="most-innovating-tech-sectors-for-each-of-the-top-10-innovative-corporations-worldwide" class="section level3">
+<h3><span class="header-section-number">4.3.2</span> Most innovating tech sectors for each of the Top 10 innovative corporations worldwide</h3>
+<p>The 10 most innovative companies worldwide with their respective 5 most important tech sectors can be seen in the 10 figures below. The code is displayed underneath them. It was nessecary to shorten and clean the data many times in order to be able to put them together in one tibble. The uspc data was therefore shortened rigorously after evaluating the relevant lines.</p>
 <p><img src="02_figures/3_3_1.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_2.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_3.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_4.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_5.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_6.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_7.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_8.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_9.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_10.png" alt="Firure: Sales for different Cities" /></p>
 <pre class="r"><code>#librarys
 get_patent_classes &lt;- function(tbl,companie){
@@ -1227,7 +1260,31 @@ build_figure(c_vec,11,6)
 build_figure(c_vec,13,7)
 build_figure(c_vec,15,8)  
 build_figure(c_vec,17,9)
-build_figure(c_vec,19,10)</code></pre>
+build_figure(c_vec,19,10)
+
+
+tech %&gt;%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = reorder(mainclass_id,-n),n, y = n, fill = mainclass_id)) +
+  theme(axis.text.x = element_text(angle = 90))+
+  
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  geom_smooth(method = &quot;lm&quot;, se = FALSE) + # Adding a trendline
+  
+  
+  
+  # Formatting
+  
+  
+  labs(
+    title = &quot;most innovative Tech Sectors for the top 10 Corporations worldwide&quot;,
+    
+    fill = &quot;Main category&quot; # Changes the legend name
+    
+  )</code></pre>
+</div>
 </div>
 </div>
 

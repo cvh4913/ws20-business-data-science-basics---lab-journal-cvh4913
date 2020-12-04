@@ -420,7 +420,10 @@ In the Third challenge, patents of various companies should be analized.
 The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the "assignee" and "patent_assignee" datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated
 
 ![Firure: Sales for different Cities](02_figures/Most_Patents_assigned_US.png)
-The 10 most effective companies in terms of patent assignement are listed on the ordinate. The code to this graph is the following.
+The 10 most effective companies in terms of patent assignement are listed on the ordinate. The most dominant company in the US when it comes to patents is the International Busines Machines Cormporation
+
+
+The code to this graph is the following.
 
 ```{r,eval=FALSE}
 
@@ -544,9 +547,21 @@ Picture_table %>%
 ```
 ## Companies with the most granted patents in 2019
 
-In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information "withdrawn" in the patents.tsv dataset was the most important. Also as the patents which weren't granted in 2019 were sutracted the top the was distributed differently than the query from before.
+In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information "withdrawn" in the patents.tsv dataset was the most important. Also as the patents which weren't granted in 2019 were subtracted the top the was distributed differently than the query from before.
 
 ![Firure: Sales for different Cities](02_figures/Most_Patents_2019_US.png)
+
+The 10 companies which are listed in the Figure above are also listed in the tibble which created the figure which is parsed below
+
+```{r,eval=TRUE}
+
+tibble<-readRDS("00_Data/03_wrangle_challenge/3_2_corporations.rds")%>%head(10)
+tibble
+
+```
+
+
+
 The used code is given here:
 
 ```{r,eval=FALSE}
@@ -677,6 +692,16 @@ res %>%
 ## Assignement over usps's
 
 in The third assignement of chapter 4 the top 5 Patent classes for the top 10 most active companies with respect to newly assigned patents had to be found. The results can be seen in the following figures. The responsible cod is displayed below.
+
+### Most innovative tech sectors
+
+The most innovative tech sector is sector "257". This can be seen in the figute below.
+
+![Firure: Sales for different Cities](02_figures/Tech_sectors.png)
+
+### Most innovating tech sectors for each of the Top 10 innovative corporations worldwide
+
+The 10 most innovative companies worldwide with their respective 5 most important tech sectors can be seen in the 10 figures below. The code is displayed underneath them. It was nessecary to shorten and clean the data many times in order to be able to put them together in one tibble. The uspc data was therefore shortened rigorously after evaluating the relevant lines. 
 
 ![Firure: Sales for different Cities](02_figures/3_3_1.png)
 ![Firure: Sales for different Cities](02_figures/3_3_2.png)
@@ -887,6 +912,28 @@ build_figure(c_vec,15,8)
 build_figure(c_vec,17,9)
 build_figure(c_vec,19,10)
 
+
+tech %>%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = reorder(mainclass_id,-n),n, y = n, fill = mainclass_id)) +
+  theme(axis.text.x = element_text(angle = 90))+
+  
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
+  
+  
+  
+  # Formatting
+  
+  
+  labs(
+    title = "most innovative Tech Sectors for the top 10 Corporations worldwide",
+    
+    fill = "Main category" # Changes the legend name
+    
+  )
 
 ```
 

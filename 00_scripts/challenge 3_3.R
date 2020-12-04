@@ -194,4 +194,26 @@ build_figure(c_vec,15,8)
 build_figure(c_vec,17,9)
 build_figure(c_vec,19,10)
 
+tech %>%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = reorder(mainclass_id,-n),n, y = n, fill = mainclass_id)) +
+  theme(axis.text.x = element_text(angle = 90))+
+  
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
+  
+  
+  
+  # Formatting
+  
+  
+  labs(
+    title = "most innovative Tech Sectors for the top 10 Corporations worldwide",
+    
+    fill = "Main category" # Changes the legend name
+    
+  )
+
 
