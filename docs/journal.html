@@ -784,7 +784,7 @@ bikes_tbl %&gt;%
 </div>
 <div id="data-wrangling" class="section level1">
 <h1><span class="header-section-number">4</span> Data Wrangling</h1>
-<p>Last compiled: 2020-12-04</p>
+<p>Last compiled: 2020-12-05</p>
 <p>In the Third challenge, patents of various companies should be analized.</p>
 <div id="companies-with-the-most-patent-activities-in-the-us" class="section level2">
 <h2><span class="header-section-number">4.1</span> Companies with the most patent activities in the US</h2>
@@ -1285,6 +1285,220 @@ tech %&gt;%
     
   )</code></pre>
 </div>
+</div>
+</div>
+<div id="visualization" class="section level1">
+<h1><span class="header-section-number">5</span> Visualization</h1>
+<p>The last chapter should teach to visualze different data sets.</p>
+<div id="visualizing-the-covid-19-cases-in-5-different-countries-for-the-year-2020" class="section level2">
+<h2><span class="header-section-number">5.1</span> Visualizing The COVID-19 Cases in 5 different countries for the year 2020</h2>
+<p>The first challenge is to visulaize different cummulative COVID-19 trajectories for States. The resulting figure is displayed below.The Maximum Value of the United States of America is higligted with a Tag.</p>
+<p><img src="02_figures/covid_figure.png" alt="Firure: Sales for different Cities" /> The code to build this one is displayed here:</p>
+<pre class="r"><code># load Librarys
+toDate &lt;- function(year, month, day) {
+  ISOdate(year, month, day)
+}
+
+toNumerics &lt;- function(Date) {
+  stopifnot(inherits(Date, c(&quot;Date&quot;, &quot;POSIXt&quot;)))
+  day &lt;- as.numeric(strftime(Date, format = &quot;%d&quot;))
+  month &lt;- as.numeric(strftime(Date, format = &quot;%m&quot;))
+  year &lt;- as.numeric(strftime(Date, format = &quot;%Y&quot;))
+  list(year = year, month = month, day = day)
+}
+
+
+library(&quot;tidyverse&quot;);
+library(&quot;readxl&quot;);
+library(&quot;lubridate&quot;)
+library(&quot;writexl&quot;)
+library(&quot;ggthemes&quot;)
+
+#Get covid data
+
+url &lt;- &quot;https://opendata.ecdc.europa.eu/covid19/casedistribution/csv&quot;
+covid_data_dt &lt;- fread(url)%&gt;%
+  as_tibble
+
+relevant_locations&lt;-c(&quot;Germany&quot;,&quot;United_Kingdom&quot;,&quot;France&quot;,&quot;Spain&quot;,&quot;United_States_of_America&quot;)
+
+covid_data_dt&lt;-covid_data_dt%&gt;%
+  rename(location=countriesAndTerritories)%&gt;%
+  filter((location %in% relevant_locations)&amp;(year==2020))%&gt;%
+  mutate(Report_date = toDate(year,month,day)) %&gt;%
+  select(Report_date,cases,location,month)%&gt;%
+  group_by(location)%&gt;%
+  arrange(Report_date)%&gt;%
+  mutate(cumulative_cases=cumsum(cases))%&gt;%
+  ungroup()
+
+
+#Objective: Plot covid cummulative cases over time 
+#Objective: customize plot 
+
+dates&lt;-covid_data_dt%&gt;%
+  pull(Report_date)%&gt;%
+  as_tibble%&gt;%
+  unique()
+
+months&lt;-covid_data_dt%&gt;%
+  pull(month)%&gt;%
+  as_tibble%&gt;%
+  unique()#%&gt;%
+  #mutate(Date=toDate(2020,month,1))
+
+xmin &lt;- first(dates)
+xmax &lt;- last(dates)
+
+#Testplot
+
+covid_data_dt %&gt;%
+  
+  # Put the aes color mapping here, to apply it to geom_line and geom_point
+  ggplot(aes(Report_date, cumulative_cases, color = location)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = &quot;Confirmed COVID-19 Cases Worlwide&quot;,
+    subtitle = &quot;Europe was optional&quot;,
+    x = &quot;Year 2020&quot;,
+    y = &quot;Cumulative Cases&quot;
+    
+    
+  )+
+  theme(
+    panel.background = element_rect(fill = &quot;transparent&quot;,
+                                    colour = &quot;transparent&quot;,
+                                    size = 0.5, linetype = &quot;solid&quot;),
+    panel.grid.major = element_line(size = 0.5, linetype = &#39;solid&#39;,
+                                    colour = &quot;black&quot;), 
+    panel.grid.minor = element_line(size = 0.25, linetype = &#39;solid&#39;,
+                                    colour = &quot;grey&quot;)
+      
+  )+
+  scale_x_continuous(breaks = toDate(2020,unique(covid_data_dt$month),1),labels= c(&quot;January&quot;,&quot;Februrary&quot;,&quot;March&quot;,&quot;April&quot;,&quot;May&quot;,&quot;June&quot;,&quot;July&quot;,&quot;August&quot;,&quot;September&quot;,&quot;October&quot;,&quot;November&quot;,&quot;December&quot;)
+                     
+                                        ) +
+  geom_label(label =  covid_data_dt%&gt;%
+               filter((location==&quot;United_States_of_America&quot;)&amp;(Report_date==xmax))%&gt;%
+               select(cumulative_cases)%&gt;%
+               as.numeric(),
+             vjust = &quot;inward&quot;,
+             hjust = &quot;inward&quot;,
+             size  = 3,
+             fill  = &#39;green&#39;,
+             color = &quot;black&quot;,
+             fontface = &quot;italic&quot;,
+             data = covid_data_dt %&gt;%
+               filter((location %in% c(&quot;United_States_of_America&quot;))&amp;Report_date==last(dates))) +
+  
+  # Or you could do it locally in each geom 
+  # (aes mapping only necessary if you map it to a column)
+  geom_line(size = 1)+scale_colour_manual(values=c(&quot;blue&quot;,&quot;black&quot;,&quot;yellow&quot;,&quot;red&quot;,&quot;green&quot;)) +
+  scale_y_continuous(breaks= seq(0, 15e6, by = 25e5),labels = scales::dollar_format(scale  = 1/1e6, 
+                                                    prefix = &quot;&quot;, 
+                                                    suffix = &quot;M&quot;)) 
+  
+coord_cartesian(ylim = c(0, 1.5e7), xlim = c(xmin, xmax))</code></pre>
+</div>
+<div id="map-of-covid-mortality-rates" class="section level2">
+<h2><span class="header-section-number">5.2</span> Map of covid mortality rates</h2>
+<p>The kast challenge was to build a map of the world wide COVID-19 mortality rates. This was done using world map data and information from “<a href="https://opendata.ecdc.europa.eu/covid19/casedistribution/csv" class="uri">https://opendata.ecdc.europa.eu/covid19/casedistribution/csv</a>”.The resulting figure is the following one.</p>
+<p><img src="02_figures/COVID_Map.png" alt="Firure: Sales for different Cities" /> Tho color map used is a pre defined one illustrating the countries with the highest mortality rates in bright yellow and the countries with the lowest mortality rates in deep blue.</p>
+<pre class="r"><code>toDate &lt;- function(year, month, day) {
+  ISOdate(year, month, day)
+}
+
+toNumerics &lt;- function(Date) {
+  stopifnot(inherits(Date, c(&quot;Date&quot;, &quot;POSIXt&quot;)))
+  day &lt;- as.numeric(strftime(Date, format = &quot;%d&quot;))
+  month &lt;- as.numeric(strftime(Date, format = &quot;%m&quot;))
+  year &lt;- as.numeric(strftime(Date, format = &quot;%Y&quot;))
+  list(year = year, month = month, day = day)
+}
+
+
+
+library(&quot;tidyverse&quot;);
+library(&quot;readxl&quot;);
+library(&quot;lubridate&quot;)
+library(&quot;writexl&quot;)
+library(&quot;ggthemes&quot;)
+library(&quot;stringr&quot;)
+
+
+world &lt;- map_data(&quot;world&quot;)
+url &lt;- &quot;https://opendata.ecdc.europa.eu/covid19/casedistribution/csv&quot;
+covid_data_tbl &lt;- fread(url)%&gt;%
+  as_tibble
+
+date&lt;-covid_data_tbl%&gt;%
+  select(day,month,year)%&gt;%
+  mutate(Date=toDate(year,month,day))%&gt;%
+  arrange(desc(Date))%&gt;%
+  slice(1:1)
+
+
+
+
+covid_data_tbl&lt;-covid_data_tbl%&gt;%
+  
+  mutate(across(countriesAndTerritories, str_replace_all, &quot;_&quot;, &quot; &quot;)) %&gt;%
+  mutate(countriesAndTerritories = case_when(
+    
+    countriesAndTerritories == &quot;United Kingdom&quot; ~ &quot;UK&quot;,
+    countriesAndTerritories == &quot;United States of America&quot; ~ &quot;USA&quot;,
+    countriesAndTerritories == &quot;Czechia&quot; ~ &quot;Czech Republic&quot;,
+    TRUE ~ countriesAndTerritories
+    
+  ))%&gt;%
+  rename(location=countriesAndTerritories)%&gt;%
+  mutate(Report_date = toDate(year,month,day)) %&gt;%
+  select(Report_date,deaths,location,month,popData2019)%&gt;%
+  group_by(location)%&gt;%
+  arrange(Report_date)%&gt;%
+  mutate(total_deaths=sum(deaths))%&gt;%
+  mutate(deaths_per_capita=total_deaths/popData2019)%&gt;%
+  filter(Report_date==date$Date)%&gt;%
+  select(-deaths,-month,-popData2019)%&gt;%
+  arrange(desc(deaths_per_capita))
+  
+  
+  
+ 
+world&lt;- left_join(world,covid_data_tbl,by=c(&quot;region&quot;=&quot;location&quot;))
+
+
+
+
+
+
+
+
+
+world %&gt;% ggplot() +
+  geom_map(aes(long,lat,fill=deaths_per_capita, map_id = region ), map = world,
+           color=&quot;#2b2b2b&quot;, size=0.15)+
+  
+  scale_fill_viridis_c(option = &quot;C&quot;)+
+  labs(
+    title = &quot;Map of Deaths per capita/Mortality Rates&quot;,
+    subtitle = &quot;By December 12th of 2020&quot;,
+    x = &quot;Longitude/°&quot;,
+    y = &quot;Latitude/°&quot;,
+    caption = &quot;Date: 12/05/2020&quot;
+    
+    
+  )+
+theme(
+  panel.background = element_rect(fill = &quot;transparent&quot;,
+                                  colour = &quot;transparent&quot;,
+                                  size = 0.5, linetype = &quot;solid&quot;),
+  panel.grid.major = element_line(size = 0.5, linetype = &#39;solid&#39;,
+                                  colour = &quot;gray&quot;), 
+  panel.grid.minor = element_line(size = 0.25, linetype = &#39;solid&#39;,
+                                  colour = &quot;white&quot;)
+  
+)</code></pre>
 </div>
 </div>
 

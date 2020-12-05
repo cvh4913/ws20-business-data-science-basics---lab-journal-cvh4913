@@ -937,5 +937,232 @@ tech %>%
 
 ```
 
+# Visualization
+
+The last chapter should teach to visualze different data sets. 
+
+## Visualizing The COVID-19 Cases in 5 different countries for the year 2020
+
+The first challenge is to visulaize different cummulative COVID-19 trajectories for States. The resulting figure is displayed below.The Maximum Value of the United States of America is higligted with a Tag.
+
+![Firure: Sales for different Cities](02_figures/covid_figure.png)
+The code to build this one is displayed here:
+
+```{r,eval=FALSE}
+
+# load Librarys
+toDate <- function(year, month, day) {
+  ISOdate(year, month, day)
+}
+
+toNumerics <- function(Date) {
+  stopifnot(inherits(Date, c("Date", "POSIXt")))
+  day <- as.numeric(strftime(Date, format = "%d"))
+  month <- as.numeric(strftime(Date, format = "%m"))
+  year <- as.numeric(strftime(Date, format = "%Y"))
+  list(year = year, month = month, day = day)
+}
 
 
+library("tidyverse");
+library("readxl");
+library("lubridate")
+library("writexl")
+library("ggthemes")
+
+#Get covid data
+
+url <- "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv"
+covid_data_dt <- fread(url)%>%
+  as_tibble
+
+relevant_locations<-c("Germany","United_Kingdom","France","Spain","United_States_of_America")
+
+covid_data_dt<-covid_data_dt%>%
+  rename(location=countriesAndTerritories)%>%
+  filter((location %in% relevant_locations)&(year==2020))%>%
+  mutate(Report_date = toDate(year,month,day)) %>%
+  select(Report_date,cases,location,month)%>%
+  group_by(location)%>%
+  arrange(Report_date)%>%
+  mutate(cumulative_cases=cumsum(cases))%>%
+  ungroup()
+
+
+#Objective: Plot covid cummulative cases over time 
+#Objective: customize plot 
+
+dates<-covid_data_dt%>%
+  pull(Report_date)%>%
+  as_tibble%>%
+  unique()
+
+months<-covid_data_dt%>%
+  pull(month)%>%
+  as_tibble%>%
+  unique()#%>%
+  #mutate(Date=toDate(2020,month,1))
+
+xmin <- first(dates)
+xmax <- last(dates)
+
+#Testplot
+
+covid_data_dt %>%
+  
+  # Put the aes color mapping here, to apply it to geom_line and geom_point
+  ggplot(aes(Report_date, cumulative_cases, color = location)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Confirmed COVID-19 Cases Worlwide",
+    subtitle = "Europe was optional",
+    x = "Year 2020",
+    y = "Cumulative Cases"
+    
+    
+  )+
+  theme(
+    panel.background = element_rect(fill = "transparent",
+                                    colour = "transparent",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "black"), 
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey")
+      
+  )+
+  scale_x_continuous(breaks = toDate(2020,unique(covid_data_dt$month),1),labels= c("January","Februrary","March","April","May","June","July","August","September","October","November","December")
+                     
+                                        ) +
+  geom_label(label =  covid_data_dt%>%
+               filter((location=="United_States_of_America")&(Report_date==xmax))%>%
+               select(cumulative_cases)%>%
+               as.numeric(),
+             vjust = "inward",
+             hjust = "inward",
+             size  = 3,
+             fill  = 'green',
+             color = "black",
+             fontface = "italic",
+             data = covid_data_dt %>%
+               filter((location %in% c("United_States_of_America"))&Report_date==last(dates))) +
+  
+  # Or you could do it locally in each geom 
+  # (aes mapping only necessary if you map it to a column)
+  geom_line(size = 1)+scale_colour_manual(values=c("blue","black","yellow","red","green")) +
+  scale_y_continuous(breaks= seq(0, 15e6, by = 25e5),labels = scales::dollar_format(scale  = 1/1e6, 
+                                                    prefix = "", 
+                                                    suffix = "M")) 
+  
+coord_cartesian(ylim = c(0, 1.5e7), xlim = c(xmin, xmax))
+
+
+```
+
+
+## Map of covid mortality rates
+
+The kast challenge was to build a map of the world wide COVID-19 mortality rates. This was done using world map data and information from "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv".The resulting figure is the following one.
+
+![Firure: Sales for different Cities](02_figures/COVID_Map.png)
+Tho color map used is a pre defined one illustrating the countries with the highest mortality rates in bright yellow and the countries with the lowest mortality rates in deep blue.
+
+
+```{r,eval=FALSE}
+toDate <- function(year, month, day) {
+  ISOdate(year, month, day)
+}
+
+toNumerics <- function(Date) {
+  stopifnot(inherits(Date, c("Date", "POSIXt")))
+  day <- as.numeric(strftime(Date, format = "%d"))
+  month <- as.numeric(strftime(Date, format = "%m"))
+  year <- as.numeric(strftime(Date, format = "%Y"))
+  list(year = year, month = month, day = day)
+}
+
+
+
+library("tidyverse");
+library("readxl");
+library("lubridate")
+library("writexl")
+library("ggthemes")
+library("stringr")
+
+
+world <- map_data("world")
+url <- "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv"
+covid_data_tbl <- fread(url)%>%
+  as_tibble
+
+date<-covid_data_tbl%>%
+  select(day,month,year)%>%
+  mutate(Date=toDate(year,month,day))%>%
+  arrange(desc(Date))%>%
+  slice(1:1)
+
+
+
+
+covid_data_tbl<-covid_data_tbl%>%
+  
+  mutate(across(countriesAndTerritories, str_replace_all, "_", " ")) %>%
+  mutate(countriesAndTerritories = case_when(
+    
+    countriesAndTerritories == "United Kingdom" ~ "UK",
+    countriesAndTerritories == "United States of America" ~ "USA",
+    countriesAndTerritories == "Czechia" ~ "Czech Republic",
+    TRUE ~ countriesAndTerritories
+    
+  ))%>%
+  rename(location=countriesAndTerritories)%>%
+  mutate(Report_date = toDate(year,month,day)) %>%
+  select(Report_date,deaths,location,month,popData2019)%>%
+  group_by(location)%>%
+  arrange(Report_date)%>%
+  mutate(total_deaths=sum(deaths))%>%
+  mutate(deaths_per_capita=total_deaths/popData2019)%>%
+  filter(Report_date==date$Date)%>%
+  select(-deaths,-month,-popData2019)%>%
+  arrange(desc(deaths_per_capita))
+  
+  
+  
+ 
+world<- left_join(world,covid_data_tbl,by=c("region"="location"))
+
+
+
+
+
+
+
+
+
+world %>% ggplot() +
+  geom_map(aes(long,lat,fill=deaths_per_capita, map_id = region ), map = world,
+           color="#2b2b2b", size=0.15)+
+  
+  scale_fill_viridis_c(option = "C")+
+  labs(
+    title = "Map of Deaths per capita/Mortality Rates",
+    subtitle = "By December 12th of 2020",
+    x = "Longitude/°",
+    y = "Latitude/°",
+    caption = "Date: 12/05/2020"
+    
+    
+  )+
+theme(
+  panel.background = element_rect(fill = "transparent",
+                                  colour = "transparent",
+                                  size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                  colour = "gray"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                  colour = "white")
+  
+)
+
+```

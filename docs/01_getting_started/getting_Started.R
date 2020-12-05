@@ -206,3 +206,6 @@ sb_year %>%
 sb_cat %>%
   write_rds("00_data/01_bike_sales/02_wrangled_data/sales_by_year_and_Category_1.rds")
 
+whole_data%>%
+  write_rds("00_data/01_bike_sales/02_wrangled_data/bikedata.rds")
+
