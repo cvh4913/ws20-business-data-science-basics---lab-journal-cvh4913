@@ -109,7 +109,8 @@ for(i in 1:nrow(bike_family_tbl)){
            read_html()%>%
            html_nodes(css = ".catalog-category-bikes__price-title") %>%
            html_text()%>%
-           str_remove(pattern = "\nab ")
+           str_remove(pattern = "\nab ")%>%
+           str_remove(pattern = "\n ")
            
            )
     

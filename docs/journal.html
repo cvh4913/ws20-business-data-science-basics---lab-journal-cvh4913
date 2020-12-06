@@ -417,7 +417,15 @@ div.tocify {
 <div id="first-assignement-bike-sales-at-different-cities-in-germany" class="section level1">
 <h1><span class="header-section-number">2</span> First Assignement: Bike Sales at different cities in germany</h1>
 <p>The assignement was to configure a given Dataset to analyze bike sakes in germany. The dataset has been reorganized to be plotable such that the used data sets are the City of interest and the total bike sales in that specific city from 2015 to 2019. The result is given in the figure below. Especially Dortmund, Breen and Wuppertal had a large amount of Bike sales from 2015 to 2019.</p>
-<p><img src="02_figures/Revenue_by_years_and_cities.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/Revenue_by_years_and_states.png" alt="Firure: Sales for different Cities" /> The result of the question which state has the highest revenue is: North-Rhine_Wesphalia.</p>
+<div class="figure">
+<img src="02_figures/Revenue_by_years_and_states.png" alt="" />
+<p class="caption">Figure: Sales for different States</p>
+</div>
+<p>The result of the question which state has the highest revenue is: North-Rhine_Wesphalia.In addition to this another chart grouped by the cities was built. The city with the most bike sales over the considered cities is Bremen, followed by Freiburg.</p>
+<div class="figure">
+<img src="02_figures/Revenue_by_years_and_cities.png" alt="" />
+<p class="caption">Figure: Sales for different Cities</p>
+</div>
 <pre class="r"><code># Data Science at TUHH ------------------------------------------------------
 # SALES ANALYSIS ----
 
@@ -625,14 +633,6 @@ sb_year %&gt;%
   write_rds(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year.rds&quot;)
 sb_cat %&gt;%
   write_rds(&quot;00_data/01_bike_sales/02_wrangled_data/sales_by_year_and_Category_1.rds&quot;)</code></pre>
-<div id="second-level-header" class="section level2">
-<h2><span class="header-section-number">2.1</span> Second level header</h2>
-<p>You can add more headers by adding more hashtags. These won’t be put into the table of contents</p>
-<div id="third-level-header" class="section level3">
-<h3><span class="header-section-number">2.1.1</span> third level header</h3>
-<p>Here’s an even lower level header</p>
-</div>
-</div>
 </div>
 <div id="data-acquisition" class="section level1">
 <h1><span class="header-section-number">3</span> Data Acquisition</h1>
@@ -652,7 +652,7 @@ test</code></pre>
 ##  8        8 THRILL HILL T~ mtb      https://www.roseb~ &lt;NA&gt;             &lt;NA&gt;    
 ##  9        9 SOUL FIRE      mtb      https://www.roseb~ /fahrräder/mtb~ &quot;2.149,0~
 ## 10        1 PRO SL DISC    rennrad  https://www.roseb~ /fahrräder/ren~ &quot;1.599,0~</code></pre>
-<p>There has been a data tibble derived from the “rosebikes.de” website of which 10 rows can be seen above. Using the Data connected here, further investigations could be possible.</p>
+<p>There has been a data tibble derived from the “rosebikes.de” website of which 10 rows can be seen above. Using the Data connected here, further investigations could be possible. Te contained Data is the Model name, the category, the url for category and the bike itself as well as the individual bikes price, as requested.</p>
 <p>The code written for this purpose is given here:</p>
 <pre class="r"><code># Data Science at TUHH ------------------------------------------------------
 # SALES ANALYSIS ----
@@ -784,12 +784,16 @@ bikes_tbl %&gt;%
 </div>
 <div id="data-wrangling" class="section level1">
 <h1><span class="header-section-number">4</span> Data Wrangling</h1>
-<p>Last compiled: 2020-12-05</p>
-<p>In the Third challenge, patents of various companies should be analized.</p>
+<p>Last compiled: 2020-12-06</p>
+<p>In the Third challenge, patents of various companies should be analized. The data provided are huge sets which comes with another challenge. Joining too large sets of data is not possible so tha data has to be cleaned prior to joining it togeher. This begins with deciding which columns of data is actually nessecary for the analization. Unnessecary data can be directly discarded by defining the corresponding column as col_skip().</p>
 <div id="companies-with-the-most-patent-activities-in-the-us" class="section level2">
 <h2><span class="header-section-number">4.1</span> Companies with the most patent activities in the US</h2>
 <p>The task is to find the ten Companies in the US who have the higest number of assigned patents. This is done using the “assignee” and “patent_assignee” datasets provided by the institute. After a bit of data rearrangement, the following chart could be isolated</p>
-<p><img src="02_figures/Most_Patents_assigned_US.png" alt="Firure: Sales for different Cities" /> The 10 most effective companies in terms of patent assignement are listed on the ordinate. The most dominant company in the US when it comes to patents is the International Busines Machines Cormporation</p>
+<div class="figure">
+<img src="02_figures/Most_Patents_assigned_US.png" alt="" />
+<p class="caption">Firure: Top 10 companies with assigned patents in the US</p>
+</div>
+<p>The 10 most effective companies in terms of patent assignement are listed on the ordinate. The most dominant company in the US when it comes to patents is the International Busines Machines Cormporation.</p>
 <p>The code to this graph is the following.</p>
 <pre class="r"><code>library(vroom)
 library(tidyverse)
@@ -909,10 +913,10 @@ Picture_table %&gt;%
 </div>
 <div id="companies-with-the-most-granted-patents-in-2019" class="section level2">
 <h2><span class="header-section-number">4.2</span> Companies with the most granted patents in 2019</h2>
-<p>In aasignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were subtracted the top the was distributed differently than the query from before.</p>
+<p>In assignement 3.2 the top ten companies with granted patents for 2019 were searched. For this task the information “withdrawn” in the patents.tsv dataset was the most important. Also as the patents which weren’t granted in 2019 were subtracted the top the was distributed differently than the query from before.</p>
 <div class="figure">
 <img src="02_figures/Most_Patents_2019_US.png" alt="" />
-<p class="caption">Firure: Sales for different Cities</p>
+<p class="caption">Figure: Top 10 Companies with granted patents in the US for 2019</p>
 </div>
 <p>The 10 companies which are listed in the Figure above are also listed in the tibble which created the figure which is parsed below</p>
 <pre class="r"><code>tibble&lt;-readRDS(&quot;00_Data/03_wrangle_challenge/3_2_corporations.rds&quot;)%&gt;%head(10)
@@ -930,6 +934,7 @@ tibble</code></pre>
 ##  8 Google Inc.                                  2112
 ##  9 General Electric Company                     1815
 ## 10 Hewlett-Packard Development Company, L.P.    1558</code></pre>
+<p>The most successful company is still the International Busines Machines Cormporation. After it the order changes though. Afterall only granted patents are useful for the company afterwards so the companies here seem to have a more efficient approach to the assignments of patents than the companies seen in assignement 3.1.</p>
 <p>The used code is given here:</p>
 <pre class="r"><code>#librarys
 
@@ -1059,13 +1064,52 @@ res %&gt;%
 <p>The most innovative tech sector is sector “257”. This can be seen in the figute below.</p>
 <div class="figure">
 <img src="02_figures/tech_sectors.png" alt="" />
-<p class="caption">Firure: Sales for different Cities</p>
+<p class="caption">Figure: Sales for different Cities</p>
 </div>
 </div>
 <div id="most-innovating-tech-sectors-for-each-of-the-top-10-innovative-corporations-worldwide" class="section level3">
 <h3><span class="header-section-number">4.3.2</span> Most innovating tech sectors for each of the Top 10 innovative corporations worldwide</h3>
 <p>The 10 most innovative companies worldwide with their respective 5 most important tech sectors can be seen in the 10 figures below. The code is displayed underneath them. It was nessecary to shorten and clean the data many times in order to be able to put them together in one tibble. The uspc data was therefore shortened rigorously after evaluating the relevant lines.</p>
-<p><img src="02_figures/3_3_1.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_2.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_3.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_4.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_5.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_6.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_7.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_8.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_9.png" alt="Firure: Sales for different Cities" /> <img src="02_figures/3_3_10.png" alt="Firure: Sales for different Cities" /></p>
+<div class="figure">
+<img src="02_figures/3_3_1.png" alt="" />
+<p class="caption">Figure: Patents per tech sector International Business Machines Corporation</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_2.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Canon Kabushiki Kaisha</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_3.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Samsung Electronics Co.. Ltd.</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_4.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Hitachi Ltd.</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_5.png" alt="" />
+<p class="caption">Figure: Patents per tech sector General Electric Company</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_6.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Sony Corporation</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_7.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Kabushiki Kaisha Toshiba</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_8.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Fujitsu Limited</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_9.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Matsushita Electric Industrial Co.. Ltd.</p>
+</div>
+<div class="figure">
+<img src="02_figures/3_3_10.png" alt="" />
+<p class="caption">Figure: Patents per tech sector Hewlett-Packard Developement Company L.P.</p>
+</div>
 <pre class="r"><code>#librarys
 get_patent_classes &lt;- function(tbl,companie){
   
@@ -1293,7 +1337,11 @@ tech %&gt;%
 <div id="visualizing-the-covid-19-cases-in-5-different-countries-for-the-year-2020" class="section level2">
 <h2><span class="header-section-number">5.1</span> Visualizing The COVID-19 Cases in 5 different countries for the year 2020</h2>
 <p>The first challenge is to visulaize different cummulative COVID-19 trajectories for States. The resulting figure is displayed below.The Maximum Value of the United States of America is higligted with a Tag.</p>
-<p><img src="02_figures/covid_figure.png" alt="Firure: Sales for different Cities" /> The code to build this one is displayed here:</p>
+<div class="figure">
+<img src="02_figures/covid_figure.png" alt="" />
+<p class="caption">Figure: Covid Data per country for 2020</p>
+</div>
+<p>The code to build this one is displayed here:</p>
 <pre class="r"><code># load Librarys
 toDate &lt;- function(year, month, day) {
   ISOdate(year, month, day)
@@ -1403,7 +1451,16 @@ coord_cartesian(ylim = c(0, 1.5e7), xlim = c(xmin, xmax))</code></pre>
 <div id="map-of-covid-mortality-rates" class="section level2">
 <h2><span class="header-section-number">5.2</span> Map of covid mortality rates</h2>
 <p>The kast challenge was to build a map of the world wide COVID-19 mortality rates. This was done using world map data and information from “<a href="https://opendata.ecdc.europa.eu/covid19/casedistribution/csv" class="uri">https://opendata.ecdc.europa.eu/covid19/casedistribution/csv</a>”.The resulting figure is the following one.</p>
-<p><img src="02_figures/COVID_Map.png" alt="Firure: Sales for different Cities" /> Tho color map used is a pre defined one illustrating the countries with the highest mortality rates in bright yellow and the countries with the lowest mortality rates in deep blue.</p>
+<div class="figure">
+<img src="02_figures/COVID_Map_MR.png" alt="" />
+<p class="caption">Figure: Mortality Rates Wordwide</p>
+</div>
+<p>The color map used is a pre defined one illustrating the countries with the highest mortality rates in bright yellow and the countries with the lowest mortality rates in deep blue.Immediately it is obvious that Jemen has the highest mortality rate of all places.</p>
+<div class="figure">
+<img src="02_figures/COVID_Map.png" alt="" />
+<p class="caption">Figure: Deaths per capita worldwide</p>
+</div>
+<p>In contrast to that Deaths per capita are plotted to the Earths map. Here Jemen is not that high op th order which could indicate that submission suppression is good there but the medical treatment isn’t.</p>
 <pre class="r"><code>toDate &lt;- function(year, month, day) {
   ISOdate(year, month, day)
 }
