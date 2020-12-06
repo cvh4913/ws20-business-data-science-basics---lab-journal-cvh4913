@@ -15,7 +15,7 @@ rmarkdown::render_site(encoding = 'UTF-8')
 ###### THIS WILL ONLY WORK IF YOU HAVE STATICRYPT INSTALLED VIA NPM ######
 ##########################################################################
 
-shell( paste0("staticrypt C:/Users/Hendrik/Documents/Uni/Business Data Science/lab_journal_website/ws20-business-data-science-basics---lab-journal-cvh4913/docs/journal.html ", Sys.getenv("LAB_KEY")) )
+shell( paste0("staticrypt ./docs/journal.html ", Sys.getenv("LAB_KEY")) )
 
 # Remove and rename resulting files
 
